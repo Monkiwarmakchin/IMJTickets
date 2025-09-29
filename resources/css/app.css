@@ -1,0 +1,51 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@plugin "daisyui";
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+.btn-imjuve {
+    background-color: #681a32;
+    color: white;
+}
+
+.text-imjuve {
+    color: #681a32;
+}
+
+.text-legend {
+    font-size: 0.875rem;  /* equivalente a text-sm */
+    font-weight: 700;     /* equivalente a font-bold */
+    color: #374151;    /* equivalente a text-gray-700 */
+}
+
+.text-validation {
+    color: #ef4444;    /* equivalente a text-red-500 */
+}
+
+/* estilo para el grip de la tabla redimensionable */
+/*.grip {
+    background: #681a32;
+    width: 3px;
+    height: 100%;
+    cursor: col-resize;
+    display: inline-block;
+    margin-left: 100px;
+    margin-right: 100px;
+}*/
+
+.resize-handle {
+    z-index: 10;
+    /* Opcional: puedes agregar un color de fondo al hacer hover */
+}
+th, td {
+    position: relative;
+}
