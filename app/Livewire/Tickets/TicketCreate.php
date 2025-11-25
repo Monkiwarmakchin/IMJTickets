@@ -4,6 +4,8 @@ namespace App\Livewire\Tickets;
 use App\Livewire\Forms\TicketForm;
 use App\Models\Type;
 use App\Models\Area;
+use App\Models\User;
+use App\Notifications\NuevoTicketPush;
 
 use Livewire\Component;
 
@@ -13,7 +15,6 @@ class TicketCreate extends Component
 
     public function createTicket()
     {
-        //Validamos y creamos el ticket en la base de datos
         $ticket = $this->form->createDBTicket();
 
         //Mandamos el mensaje de la alerta de exito
@@ -24,7 +25,18 @@ class TicketCreate extends Component
 
         // Redireccion livewire
         // return $this->redirect('/', navigate: true);
+        $admins = User::where('role', '1')->get(); 
+
+        $datosTicket = [
+            'id' => $ticket->id,
+            'nombre' => $ticket->nombre
+        ];
+
+        foreach ($admins as $admin) {
+            $admin->notify(new NuevoTicketPush($datosTicket));
+        }
     }
+
 
     public function render()
     {

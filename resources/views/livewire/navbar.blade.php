@@ -49,6 +49,12 @@
             
             @auth
                 <!-- contenedor relativo inline-block para logout + ghost -->
+                <button id="btn-enable-notif" onclick="subscribeUser()" class="btn btn-ghost btn-circle hidden text-warning mr-2" title="Activar Notificaciones de Escritorio">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                </button>
+
                 <div class="relative inline-block">
 
                     <button wire:click="logout" class="btn btn-imjuve">
@@ -92,7 +98,54 @@
                 <span>{{ session('createTicket') }}</span>
             </div>
         </div>
-
     @endif
 
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+            if (Notification.permission === 'default') {
+                document.getElementById('btn-enable-notif').classList.remove('hidden');
+            }
+        });
+
+        async function subscribeUser() {
+            try {
+                const registration = await navigator.serviceWorker.register('/sw.js');
+                await navigator.serviceWorker.ready;
+
+                const permission = await Notification.requestPermission();
+                if (permission !== 'granted') {
+                    Swal.fire('Permiso denegado', 'No podrás recibir alertas de escritorio.', 'info');
+                    return;
+                }
+
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array('{{ env('VAPID_PUBLIC_KEY') }}')
+                });
+
+                await axios.post('/push/subscribe', subscription);
+                
+                Swal.fire('¡Listo!', 'Notificaciones de escritorio activadas.', 'success');
+                
+                document.getElementById('btn-enable-notif').classList.add('hidden');
+
+            } catch (error) {
+                console.error('Error en suscripción:', error);
+                Swal.fire('Error', 'No se pudieron activar las notificaciones.', 'error');
+            }
+        }
+
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+    </script>
 </div>
